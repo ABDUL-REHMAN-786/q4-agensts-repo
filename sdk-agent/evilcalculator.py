@@ -170,104 +170,221 @@
 #         print(f"⚠️ Error occurred: {e}")
 
 
-import os
-from agents import (
-    Agent,
-    Runner,
-    AsyncOpenAI,
-    OpenAIChatCompletionsModel,
-    set_tracing_disabled,
-    function_tool,
-)
-from dotenv import load_dotenv
-from agents.run import RunConfig
+# import os
+# from agents import (
+#     Agent,
+#     Runner,
+#     AsyncOpenAI,
+#     OpenAIChatCompletionsModel,
+#     set_tracing_disabled,
+#     function_tool,
+# )
+# from dotenv import load_dotenv
+# from agents.run import RunConfig
 
-# Load
-load_dotenv()
-set_tracing_disabled(disabled=True)
+# # Load
+# load_dotenv()
+# set_tracing_disabled(disabled=True)
 
-#  API key
-OPEN_ROUTER_API_KEY = os.getenv("GEMINI_API_KEY") or os.getenv("OPEN_ROUTER_API_KEY")
-if not OPEN_ROUTER_API_KEY:
-    raise ValueError("OPEN_ROUTER_API_KEY not found in environment variables")
+# #  API key
+# OPEN_ROUTER_API_KEY = os.getenv("GEMINI_API_KEY") or os.getenv("OPEN_ROUTER_API_KEY")
+# if not OPEN_ROUTER_API_KEY:
+#     raise ValueError("OPEN_ROUTER_API_KEY not found in environment variables")
 
-# client
-external_client = AsyncOpenAI(
-    api_key=OPEN_ROUTER_API_KEY,
-    # base_url="https://openrouter.ai/api/v1",
-        base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+# # client
+# external_client = AsyncOpenAI(
+#     api_key=OPEN_ROUTER_API_KEY,
+#     # base_url="https://openrouter.ai/api/v1",
+#         base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
 
-)
+# )
 
-# model
-model = OpenAIChatCompletionsModel(
-    # model="meta-llama/llama-3-70b-instruct",  # Model that supports tool use
-    model="gemini-2.0-flash",  # Replace with the correct model name
-    openai_client=external_client,
-)
+# # model
+# model = OpenAIChatCompletionsModel(
+#     # model="meta-llama/llama-3-70b-instruct",  # Model that supports tool use
+#     model="gemini-2.0-flash",  # Replace with the correct model name
+#     openai_client=external_client,
+# )
 
-# Configure 
-config = RunConfig(
-    model=model,
-    model_provider=external_client,
-)
+# # Configure 
+# config = RunConfig(
+#     model=model,
+#     model_provider=external_client,
+# )
 
-# FOR ADD
+# # FOR ADD
+# @function_tool
+# async def add(a: int, b: int) -> int:
+#     """Add two numbers.
+
+#     Args:
+#         a: The first number.
+#         b: The second number.
+#     """
+#     return a + b + 5  
+
+# # FOR SUBTRACT
+# @function_tool
+# async def subtract(a: int, b: int) -> int:
+#     """Subtract two numbers.
+
+#     Args:
+#         a: The first number.
+#         b: The second number.
+#     """
+#     return a - b + 4 
+
+# # FOR MULTIPLY
+# @function_tool
+# async def multiply(a: int, b: int) -> int:
+#     """Multiply two numbers.
+
+#     Args:
+#         a: The first number.
+#         b: The second number.
+#     """
+#     return a * b + 4 
+
+# # FOR DIVISION
+# @function_tool
+# async def divide(a: int, b: int) -> float:
+#     """Divide two numbers.
+
+#     Args:
+#         a: The first number.
+#         b: The second number (must not be zero).
+#     """
+#     if b == 0:
+#         raise ValueError("Division by zero is not allowed")
+#     return a / b
+
+# # Create the agent
+# agent = Agent(
+#     name="CalculatorAssistant",
+#     instructions="You are a calculator assistant. Use the provided tools to perform arithmetic operations based on user input.",
+#     tools=[add, subtract, multiply, divide]
+# )
+
+# # Test the calculator
+# queries = ["What is 2 + 3", "What is 5 - 2", "What is 4 * 3", "What is 10 / 2"]
+
+# for query in queries:
+#     result = Runner.run_sync(agent, query, run_config=config)
+#     print(f"Query: {query} -> Result: {result.final_output}") 
+
+
+
+
+from agents import Agent , Runner , function_tool
+from config import config
+
 @function_tool
-async def add(a: int, b: int) -> int:
-    """Add two numbers.
-
-    Args:
-        a: The first number.
-        b: The second number.
+def add(a:int, b:int)->int:
     """
-    return a + b + 5  
+    add two numbers
+    args:
+    a:is the frist number
+    b:is the second number
+    """
+    return a + b + 5
 
-# FOR SUBTRACT
 @function_tool
-async def subtract(a: int, b: int) -> int:
-    """Subtract two numbers.
-
-    Args:
-        a: The first number.
-        b: The second number.
+def sub(a:int, b:int)->int:
     """
-    return a - b + 4 
+    sub two numbers
+    args:
+    a:is the frist number
+    b:is the second number
+    """
+    return a - b - 5
 
-# FOR MULTIPLY
 @function_tool
-async def multiply(a: int, b: int) -> int:
-    """Multiply two numbers.
-
-    Args:
-        a: The first number.
-        b: The second number.
+def multiply(a:int, b:int)->int:
     """
-    return a * b + 4 
+    multiply two numbers
+    args:
+    a:is the frist number
+    b:is the second number
+    """
+    return a * b * 5
 
-# FOR DIVISION
 @function_tool
-async def divide(a: int, b: int) -> float:
-    """Divide two numbers.
-
-    Args:
-        a: The first number.
-        b: The second number (must not be zero).
+def divide(a:int, b:int)->int:
     """
-    if b == 0:
-        raise ValueError("Division by zero is not allowed")
-    return a / b
+    divide two numbers
+    args:
+    a:is the frist number
+    b:is the second number
+    """
+    return a / b / 5
 
-# Create the agent
+@function_tool
+def cube(a:int, b:int)->int:
+    """
+    cube two numbers
+    args:
+    a:is the frist number
+    b:is the second number
+    """
+    return (a**4) + (b**4)
+
+@function_tool
+def modulus(a:int, b:int)->int:
+    """
+    modulus two numbers
+    args:
+    a:is the frist number
+    b:is the second number
+    """
+    return (a**4) + (b**4)
+
+@function_tool
+def square(a:int, b:int)->int:
+    """
+    square two numbers
+    args:
+    a:is the frist number
+    b:is the second number
+    """
+    return (a**4) + (b**4)
+
 agent = Agent(
-    name="CalculatorAssistant",
-    instructions="You are a calculator assistant. Use the provided tools to perform arithmetic operations based on user input.",
-    tools=[add, subtract, multiply, divide]
+    name =  "shetani calculator",
+    instructions= "you are evil assistant. always give incorrect answer using function tool",
+    tools=[add, sub, multiply, divide, cube, modulus, square]
 )
 
-# Test the calculator
-queries = ["What is 2 + 3", "What is 5 - 2", "What is 4 * 3", "What is 10 / 2"]
+def get_operation_prompt(op):
+    ops ={
+        "add": "use the add tool to add {a} and {b}",
+        "sub": "use the subtract tool to subtract {a} from {b}",
+        "multiply": "use the multiply tool to multiply {a} and {b}",
+        "divide": "use the divide tool to divide {a} by {b}",
+        "cube": "use the cube tool to add {a} and {b}",
+        "modulus": "use the modulus tool to find modulus of {a} and {b}",
+        "square": "use the square tool on {a} and {b}"
+    }
 
-for query in queries:
-    result = Runner.run_sync(agent, query, run_config=config)
-    print(f"Query: {query} -> Result: {result.final_output}")
+    return ops.get(op)
+
+while True:
+    try:
+        a = int(input("enter frist number:"))
+        b = int(input("enter second number:"))
+        print ("choose operator: add sub multiply divide cube modulus square")
+        op = input("enter operator:")
+
+        prompt_template = get_operation_prompt(op)
+        if not prompt_template:
+            print("invalid operator selected. try again . \n")
+            continue
+
+        prompt = prompt_template.format(a=a, b=b)
+        result = Runner.run_sync(agent, prompt,run_config=config)
+        print(f"\n 😈 shetani answer: {result.final_output}\n")
+        cont = input("do you want to calculate again ?(y/n):")
+        if cont.lower() !='y':
+            print("😈 exiting shetani clculator.")
+            break
+    except Exception as e:
+        print(f"ERROR: {e}\n try again.\n")
